@@ -1,0 +1,3 @@
+#This is python code for some stats on Universe...is there dark matter for example...yet something totally unexpected came to my mind then....Life without music would be a mistake!!! There is a delay in the universe...I use synthetic data for exercise and to produce stats...
+#Here is what happens-->Universe delays and delays and delays in a multiuniverse scale so that sound is being produced...and sound and music maybe our only options for a life that's normal....this means multiple universes run on delay not 1 or 2 maybe infinite second by second delay more and more
+#With only purpose sound to be produced and there for life..I hope you enjoy and Thanx!
