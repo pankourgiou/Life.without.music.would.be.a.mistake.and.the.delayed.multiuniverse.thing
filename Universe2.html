@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Universal Synthetic Data Generator</title>
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      color: #58a6ff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: #161b22;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    canvas {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table th, table td {
+      border: 1px solid #30363d;
+      padding: 8px;
+      text-align: center;
+    }
+
+    table th {
+      background: #21262d;
+    }
+
+    .small {
+      color: #8b949e;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Universal Synthetic Data Generator</h1>
+
+  <div class="card">
+    <p>
+      This HTML version recreates the synthetic astronomy dataset generation
+      from your Python script using JavaScript.
+    </p>
+
+    <button onclick="generateData()">
+      Generate Synthetic Dataset
+    </button>
+
+    <p class="small" id="status">
+      Waiting to generate...
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>PCA-like Scatter Visualization</h2>
+    <canvas id="scatterChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Distance Histogram</h2>
+    <canvas id="histChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Top Anomalous Samples</h2>
+    <table id="anomalyTable">
+      <thead>
+        <tr>
+          <th>Obs ID</th>
+          <th>Constellation</th>
+          <th>Distance (ly)</th>
+          <th>Dark Matter Density</th>
+          <th>Anomaly Score</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+
+const SEED = 42;
+const N = 1500;
+
+const constellations = [
+  "Orion","Lyra","Cygnus","Draco","Andromeda",
+  "Pegasus","Scorpius","Cassiopeia","Phoenix","Vulpecula"
+];
+
+let dataset = [];
+
+function randomUniform(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randomNormal(mean = 0, std = 1) {
+  let u = 0, v = 0;
+  while(u === 0) u = Math.random();
+  while(v === 0) v = Math.random();
+
+  return mean + std *
+    Math.sqrt(-2.0 * Math.log(u)) *
+    Math.cos(2.0 * Math.PI * v);
+}
+
+function randomExponential(scale = 1) {
+  return -scale * Math.log(1 - Math.random());
+}
+
+function randomPoisson(lambda) {
+  let L = Math.exp(-lambda);
+  let p = 1.0;
+  let k = 0;
+
+  do {
+    k++;
+    p *= Math.random();
+  } while (p > L);
+
+  return k - 1;
+}
+
+function generateData() {
+
+  dataset = [];
+
+  for (let i = 0; i < N; i++) {
+
+    const ra = randomUniform(0, 360);
+    const dec = randomUniform(-90, 90);
+
+    let distance_ly =
+      randomExponential(800) + randomNormal(0, 40);
+
+    distance_ly = Math.max(0.1, distance_ly);
+
+    const redshift =
+      Math.abs(randomNormal(0.02, 0.01)) +
+      (distance_ly / 1e6);
+
+    const luminosity =
+      Math.pow(10, randomNormal(28, 1.2));
+
+    const dark_matter_density =
+      Math.abs(randomNormal(0.3, 0.1)) *
+      (1 + (distance_ly / 1e5) * 0.02);
+
+    const energy_flux =
+      luminosity /
+      (4 * Math.PI *
+      Math.pow(distance_ly * 9.461e15, 2) + 1e-12);
+
+    const planet_count = randomPoisson(2);
+
+    const avg_planet_mass =
+      Math.exp(randomNormal(Math.log(1.0), 1.0)) *
+      (1 + (planet_count > 0 ? 0.2 : 0));
+
+    const orbital_speed_mean =
+      Math.abs(randomNormal(30, 20)) +
+      Math.pow(avg_planet_mass, 0.25);
+
+    const star_temperature =
+      randomNormal(5000, 1200);
+
+    const metallicity =
+      randomNormal(0.02, 0.01);
+
+    const gravitational_well =
+      Math.log1p(luminosity) *
+      Math.sqrt(dark_matter_density) /
+      (Math.pow(distance_ly, 0.1) + 1e-6);
+
+    const quantum_fluctuation_index =
+      Math.abs(randomNormal(0.001, 0.0008)) *
+      (1 + Math.sin(ra / 180 * Math.PI));
+
+    const dark_energy_pressure =
+      randomUniform(-1.2, -0.6) +
+      (redshift * 0.03);
+
+    const anomaly_score =
+      (dark_matter_density * 2.0 +
+      quantum_fluctuation_index * 1000) /
+      (1 + distance_ly / 1e4);
+
+    dataset.push({
+      obs_id: i + 1,
+      constellation:
+        constellations[
+          Math.floor(Math.random() * constellations.length)
+        ],
+      ra,
+      dec,
+      distance_ly,
+      redshift,
+      luminosity,
+      dark_matter_density,
+      energy_flux,
+      planet_count,
+      avg_planet_mass,
+      orbital_speed_mean,
+      star_temperature,
+      metallicity,
+      gravitational_well,
+      quantum_fluctuation_index,
+      dark_energy_pressure,
+      anomaly_score
+    });
+  }
+
+  document.getElementById("status").innerText =
+    `Generated ${N} synthetic observations successfully.`;
+
+  drawScatter();
+  drawHistogram();
+  populateTable();
+}
+
+function drawScatter() {
+
+  const ctx = document.getElementById('scatterChart');
+
+  const points = dataset.map(d => ({
+    x: d.ra,
+    y: d.dec
+  }));
+
+  new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'RA vs DEC',
+        data: points,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Right Ascension'
+          }
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'Declination'
+          }
+        }
+      }
+    }
+  });
+}
+
+function drawHistogram() {
+
+  const ctx = document.getElementById('histChart');
+
+  const bins = 20;
+  const max = Math.max(...dataset.map(d => d.distance_ly));
+  const min = 0;
+  const step = max / bins;
+
+  let histogram = new Array(bins).fill(0);
+
+  dataset.forEach(d => {
+    let index = Math.min(
+      bins - 1,
+      Math.floor(d.distance_ly / step)
+    );
+
+    histogram[index]++;
+  });
+
+  const labels = histogram.map((_, i) =>
+    `${(i * step).toFixed(0)}`
+  );
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Distance Distribution',
+        data: histogram
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+}
+
+function populateTable() {
+
+  const tbody =
+    document.querySelector("#anomalyTable tbody");
+
+  tbody.innerHTML = "";
+
+  const top =
+    [...dataset]
+      .sort((a,b) =>
+        b.anomaly_score - a.anomaly_score
+      )
+      .slice(0, 8);
+
+  top.forEach(d => {
+
+    const row = `
+      <tr>
+        <td>${d.obs_id}</td>
+        <td>${d.constellation}</td>
+        <td>${d.distance_ly.toFixed(2)}</td>
+        <td>${d.dark_matter_density.toFixed(4)}</td>
+        <td>${d.anomaly_score.toFixed(4)}</td>
+      </tr>
+    `;
+
+    tbody.innerHTML += row;
+  });
+}
+
+</script>
+
+</body>
+</html>
